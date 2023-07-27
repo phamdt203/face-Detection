@@ -1,0 +1,1 @@
+# Đường dẫn thư mục lưu ảnh sau khi crop
