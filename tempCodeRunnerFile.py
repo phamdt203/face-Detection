@@ -1,1 +1,1 @@
-# Đường dẫn thư mục lưu ảnh sau khi crop
+{num_epochs}], Loss: {loss.item()}')

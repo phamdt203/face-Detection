@@ -1,7 +1,0 @@
-arguments: data.py ./lfw ./cropped
---------------------
-tensorflow version: 2.12.0
---------------------
-git hash: b'HEAD'
---------------------
-b''
