@@ -23,15 +23,21 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs):
     torch.save(model.state_dict(), "facenet_model.pth")
 
 def main():
-    model = InceptionResnetV1()
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
     optimizer = optim.SGD(model.parameters(), lr = LEARNING_RATE)
     num_epochs = NUM_EPOCHS
-    transform = transforms.Compose([
-        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean = [0.5, 0.5, 0.5], std = [0.5, 0.5, 0.5])
-    ])
+    # transform = transforms.Compose([
+    #     transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize(mean = [0.5, 0.5, 0.5], std = [0.5, 0.5, 0.5])
+    # ])
 
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
 
     path = r"C:\Users\Dell\OneDrive\Desktop\Code\AI\AI\faceRecognition\cropped"
     dataset = TripletFaceDataset(root_dir= path, transform= transform)
