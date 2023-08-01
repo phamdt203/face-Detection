@@ -39,7 +39,7 @@ def main():
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    path = r"C:\Users\Dell\OneDrive\Desktop\Code\AI\AI\faceRecognition\cropped"
+    path = r"cropped"
     dataset = TripletFaceDataset(root_dir= path, transform= transform)
     loss_fn = nn.TripletMarginLoss(margin = ALPHA)
     dataset = DataLoader(dataset = dataset, batch_size= BATCH_SIZE)
