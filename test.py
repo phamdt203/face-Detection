@@ -1,18 +1,37 @@
-# from dataCrop import crop_faces_from_image
-# import os
+import torch
+import pickle
+import torch.nn as nn
+from torchvision import transforms
+from PIL import Image
+from data import *
+from parameters import *
+from facenet_pytorch import InceptionResnetV1
 import cv2
-# from mtcnn import MTCNN
-import time
-import glob
+import numpy as np
 
+model = InceptionResnetV1()
+model.load_state_dict(torch.load("facenet_model.pth"))
+model.eval()
 
-my_list = glob.glob("lfw\lfw\*\*.jpg")
-time_start = time.time()
-for it in my_list:
-    image = cv2.imread(it)
-    gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    haar_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-    faces_rect = haar_cascade.detectMultiScale(gray_img, 1.1, 9)
-    print(11111)
-time_end = time.time()
-print(( time_end - time_start) / 5)
+transform = transforms.Compose([
+    transforms.Resize((160, 160)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+])
+
+with open("./path_dict.p", "rb") as f:
+    paths = pickle.load(f)
+
+faces = []
+for key in paths.keys():
+    paths[key] = paths[key].replace("\\", "/")
+    faces.append(key)
+
+images = {}
+for key in paths.keys():
+    li = []
+    for img in os.listdir(paths[key]):
+        img1 = cv2.imread(os.path.join(paths[key],img))
+        img2 = img1[...,::-1]
+        li.append(np.around(np.transpose(img2, (2,0,1))/255.0, decimals=12))
+    images[key] = np.array(li)
