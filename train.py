@@ -9,10 +9,11 @@ from parameters import *
 from loss import *
 from data import *
 
-def train_model(model, train_loader, loss_fn, optimizer, num_epochs):
+def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
     for epoch in range(num_epochs):
         for i, triplet in enumerate(train_loader):
             anchors, positives, negatives = triplet
+            anchors, positives, negatives = anchors.to(device), positives.to(device), negatives.to(device)
             anchors_embedding, positives_embedding, negatives_embedding = model(anchors), model(positives), model(negatives)
             loss = loss_fn(anchors_embedding, positives_embedding, negatives_embedding)
             optimizer.zero_grad()
@@ -22,7 +23,9 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs):
     torch.save(model.state_dict(), "facenet_model.pth")
 
 def main():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
+    model = model.to(device)
     optimizer = optim.SGD(model.parameters(), lr = LEARNING_RATE)
     num_epochs = NUM_EPOCHS
     # transform = transforms.Compose([
@@ -43,7 +46,7 @@ def main():
     loss_fn = nn.TripletMarginLoss(margin = ALPHA)
     dataset = DataLoader(dataset = dataset, batch_size= BATCH_SIZE)
     # Training 
-    train_model(model = model, train_loader = dataset, loss_fn = loss_fn, optimizer= optimizer, num_epochs= num_epochs)  
+    train_model(model = model, train_loader = dataset, loss_fn = loss_fn, optimizer= optimizer, num_epochs= num_epochs, device = device)  
 
 if __name__ == '__main__':
     main()
