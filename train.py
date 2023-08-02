@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
-from facenet_pytorch import InceptionResnetV1
 from PIL import Image
 from parameters import *
 from loss import *
@@ -26,23 +25,16 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = InceptionResnetV1(pretrained='vggface2')
+    model = torch.hub.load('pytorch/vision', 'inception_v3', pretrained=True)
     model = model.to(device)
-    optimizer = optim.SGD(model.parameters(), lr = LEARNING_RATE)
+    optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
     num_epochs = NUM_EPOCHS
-    # transform = transforms.Compose([
-    #     transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-    #     transforms.ToTensor(),
-    #     transforms.Normalize(mean = [0.5, 0.5, 0.5], std = [0.5, 0.5, 0.5])
-    # ])
-
     transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        transforms.Resize(IMAGE_SIZE),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
-
     path = r"cropped"
     dataset = TripletFaceDataset(root_dir= path, transform= transform)
     loss_fn = nn.TripletMarginLoss(margin = ALPHA)
