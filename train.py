@@ -7,6 +7,7 @@ from PIL import Image
 from parameters import *
 from loss import *
 from data import *
+from facenet_pytorch import InceptionResnetV1
 
 def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
     model.train(True)
@@ -25,7 +26,7 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.hub.load('pytorch/vision', 'inception_v3', pretrained=True)
+    model = InceptionResnetV1()
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
     num_epochs = NUM_EPOCHS
