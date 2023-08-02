@@ -26,7 +26,7 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = InceptionResnetV1()
+    model = InceptionResnetV1(pretrained="vggface2")
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
     num_epochs = NUM_EPOCHS
