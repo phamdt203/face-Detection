@@ -20,7 +20,8 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            print(f"Epoch [{epoch + 1} / {num_epochs}], image [{i + 1} / {len(train_loader)}], loss value : {loss.item()}")
+            if (i + 1) % 10:
+                print(f"Epoch [{epoch + 1} / {num_epochs}], image [{i + 1} / {len(train_loader)}], loss value : {loss.item()}")
     torch.save(model.state_dict(), "facenet_model.pth")
 
 def main():
