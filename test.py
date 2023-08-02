@@ -85,7 +85,7 @@ for face in faces:
         database[face].append(img_to_encoding(os.path.join(paths[face],img), model))
 
 camera = cv2.VideoCapture(0)
-fd = faceDetector('fd_models/haarcascade_frontalface_default.xml')
+fd = faceDetector('haarcascade_frontalface_default.xml')
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID') #codec for video
 out = cv2.VideoWriter('output.avi', fourcc, 20, (800, 600) )#Output object
