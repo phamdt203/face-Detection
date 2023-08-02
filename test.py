@@ -20,10 +20,11 @@ model.load_state_dict(torch.load("facenet_model.pth"))
 model.eval()
 
 transform = transforms.Compose([
-    transforms.Resize((160, 160)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-])
+        transforms.Resize(IMAGE_SIZE),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    ])
 
 with open("./path_dict.p", "rb") as f:
     paths = pickle.load(f)
@@ -40,6 +41,7 @@ for key in paths.keys():
         img1 = cv2.imread(os.path.join(paths[key],img))
         img2 = img1[...,::-1]
         li.append(np.around(np.transpose(img2, (2,0,1))/255.0, decimals=12))
+    print(li.shape)
     images[key] = np.array(li)
 
 if(len(faces) == 0):
