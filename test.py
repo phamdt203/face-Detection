@@ -106,7 +106,7 @@ while True:
         
         for face in range(len(faces)):
             person = faces[face]
-            dist, detected = verify(roi, person, database[person], FRmodel)
+            dist, detected = verify(roi, person, database[person], model)
             if detected == True and dist<min_dist:
                 min_dist = dist
                 identity = person
