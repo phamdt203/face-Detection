@@ -10,6 +10,7 @@ from loss import *
 from data import *
 
 def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
+    model.train(True)
     for epoch in range(num_epochs):
         for i, triplet in enumerate(train_loader):
             anchors, positives, negatives = triplet
@@ -24,7 +25,7 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
+    model = InceptionResnetV1(pretrained='vggface2')
     model = model.to(device)
     optimizer = optim.SGD(model.parameters(), lr = LEARNING_RATE)
     num_epochs = NUM_EPOCHS
