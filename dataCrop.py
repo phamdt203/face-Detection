@@ -2,8 +2,8 @@ import os
 import cv2
 import pickle
 
-lfw_dataset_dir = r'C:\Users\Dell\OneDrive\Desktop\Code\AI\AI\faceRecognition\lfw'
-output_dir = r'C:\Users\Dell\OneDrive\Desktop\Code\AI\AI\faceRecognition\cropped'
+lfw_dataset_dir = r'lfw'
+output_dir = r'cropped'
 
 def crop_faces_from_image(index, image_path, output_dir = None):
     image_name = os.path.basename(image_path)
