@@ -23,9 +23,9 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs, device):
                 print(f"Epoch [{epoch + 1} / {num_epochs}], image [{i + 1} / {len(train_loader)}], loss value : {loss.item()}")
     torch.save(model.state_dict(), "facenet_model.pth")
 
-def main():
+def train_main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
     num_epochs = NUM_EPOCHS
@@ -39,8 +39,4 @@ def main():
     dataset = TripletFaceDataset(root_dir= path, transform= transform)
     loss_fn = nn.TripletMarginLoss(margin = ALPHA)
     dataset = DataLoader(dataset = dataset, batch_size= BATCH_SIZE)
-    # Training 
     train_model(model = model, train_loader = dataset, loss_fn = loss_fn, optimizer= optimizer, num_epochs= num_epochs, device = device)  
-
-if __name__ == '__main__':
-    main()
