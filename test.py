@@ -56,14 +56,14 @@ def verify(image_path, identity, database, model):
         
     return min_dist, door_open
 
-def load_database(faces, paths, model):
+def load_database(faces, paths, model, transform):
     database = {}
     for face in faces:
         database[face] = []
 
     for face in faces:
         for img in os.listdir(paths[face]):
-            database[face].append(img_to_encoding(os.path.join(paths[face],img), model))
+            database[face].append(img_to_encoding(os.path.join(paths[face],img), model, transform))
     return database
 
 def faceRecognition(faceDetector, imgae_path,database, faces, model):
@@ -90,7 +90,7 @@ def faceRecognition(faceDetector, imgae_path,database, faces, model):
             cv2.putText(image, identity, (x+ (w//2),y-2), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), lineType=cv2.LINE_AA)
     cv2.imread(image_path, image)
 
-def test_main():
+def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
     model = model.to(device)
@@ -111,3 +111,6 @@ def test_main():
     images = load_images(paths, transform)
     database = load_database(faces, paths, model)
     faceRecognition()
+
+if __name__ == "__main__":
+    main()

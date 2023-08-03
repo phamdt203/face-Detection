@@ -10,7 +10,7 @@ import os
 import pickle
 import sys
 
-app = FastAPI()
+app = FastAPI(title = "FACE RECOGNITION")
 
 def faceRecognition(image_path):
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
