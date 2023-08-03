@@ -108,6 +108,7 @@ def main():
     paths = load_path()
     print(paths)
     faces = load_face(paths)
+    print(faces)
     images = load_images(paths, transform)
     database = load_database(faces, paths, model)
     faceRecognition()
