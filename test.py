@@ -10,6 +10,7 @@ import numpy as np
 from loss import *
 from faceDetector import *
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 import os
 
 def load_path():
@@ -38,16 +39,15 @@ def load_images(paths, transform):
 
 def img_to_encoding(image_path, model, transform, device):
     image = Image.open(image_path).convert("RGB")
-    image = transform(image)
-    image = DataLoader(dataset = image, batch_size= BATCH_SIZE)
+    image_tensor = transform(image).unsqueeze(0).to(device)  # Move the tensor to the same device as the model
     with torch.no_grad():
-      return model(image)
-
+        return model(image_tensor)
+    
 def verify(image_path, identity, database, model, transform, device):
-    encoding = img_to_encoding(image_path, model, transform, device)
     min_dist = 1000
-    for  pic in database:
-        dist = np.linalg.norm(encoding - pic)
+    image_tensor = img_to_encoding(image_path, model, transform, device)
+    for pic in database:
+        dist = F.cosine_similarity(image_tensor, pic)
         if dist < min_dist:
             min_dist = dist
     print(identity + ' : ' +str(min_dist)+ ' ' + str(len(database)))
@@ -65,14 +65,14 @@ def load_database(faces, paths, model, transform, device):
         database[face] = []
 
     for face in faces:
+      if os.path.exists(paths[face]):
         for img in os.listdir(paths[face]):
             database[face].append(img_to_encoding(os.path.join(paths[face],img), model, transform, device))
     return database
 
 def faceRecognition(faceDetector, image_path, database, faces, model, transform, device):
-    image = cv2.read(image_path)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    faceRects = faceDetector.detect(gray)
+    image = cv2.imread(image_path)
+    gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     output_path = "test_image"
     for (x, y, w, h) in faceRects:
         roi = image[y:y+h,x:x+w]
@@ -83,7 +83,7 @@ def faceRecognition(faceDetector, image_path, database, faces, model, transform,
         detected  = False
         for face in range(len(faces)):
             person = faces[face]
-            dist, detected = verify(roi, person, database[person], model, transform, device)
+            dist, detected = verify(image_path, person, database[person], model, transform, device)
             if detected and dist < min_dist:
                 min_dist = dist
                 identity = person
@@ -106,13 +106,13 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
-
+    image_path = r'test_image/1.jpeg'
     fd = faceDetector('haarcascade_frontalface_default.xml')
     paths = load_path()
     faces = load_face(paths)
     images = load_images(paths, transform)
     database = load_database(faces, paths, model, transform, device)
-    faceRecognition(fd, database, faces, model, transform, device)
+    faceRecognition(fd, image_path, database, faces, model, transform, device)
 
 if __name__ == "__main__":
     main()
