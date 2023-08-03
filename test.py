@@ -27,15 +27,16 @@ def load_images(paths, transform):
     images = {}
     for key in paths.keys():
         li = []
-        for img in os.listdir(paths[key]):
-            image = cv2.imread(os.path.join(paths[key],img))
+        if os.path.exists(paths[key]):
+          for img in os.listdir(paths[key]):
+            image = Image.open(os.path.join(paths[key],img)).convert("RGB")
             image = transform(image)
             li.append(image)
-        images[key] = np.array(li)
+        images[key] = li
     return images
 
 def img_to_encoding(image_path, model, transform):
-    image = cv2.imread(image_path)
+    image = Image.open(image_path).convert("RGB")
     image = transform(image)
     embedding = model(image)
     return embedding
@@ -106,11 +107,9 @@ def main():
 
     fd = faceDetector('haarcascade_frontalface_default.xml')
     paths = load_path()
-    print(paths)
     faces = load_face(paths)
-    print(faces)
     images = load_images(paths, transform)
-    database = load_database(faces, paths, model)
+    database = load_database(faces, paths, model, transform)
     faceRecognition()
 
 if __name__ == "__main__":
