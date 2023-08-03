@@ -39,7 +39,7 @@ def load_images(paths, transform):
 def img_to_encoding(image_path, model, transform, device):
     image = Image.open(image_path).convert("RGB")
     image = transform(image)
-    image = DataLoader(dataset = image)
+    image = DataLoader(dataset = image, batch_size= BATCH_SIZE)
     with torch.no_grad():
       return model(image)
 
@@ -73,7 +73,7 @@ def faceRecognition(faceDetector, image_path, database, faces, model, transform,
     image = cv2.read(image_path)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faceRects = faceDetector.detect(gray)
-    image_path = "test_image"
+    output_path = "test_image"
     for (x, y, w, h) in faceRects:
         roi = image[y:y+h,x:x+w]
         roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
@@ -87,7 +87,7 @@ def faceRecognition(faceDetector, image_path, database, faces, model, transform,
             if detected and dist < min_dist:
                 min_dist = dist
                 identity = person
-        image_path = os.path.join(image_path, f"{identity}.jpg")
+        image_path = os.path.join(output_path, f"{identity}.jpg")
         if detected:
             cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
             cv2.putText(image, identity, (x+ (w//2),y-2), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), lineType=cv2.LINE_AA)
