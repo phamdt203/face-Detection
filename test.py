@@ -111,6 +111,3 @@ def test_main():
     images = load_images(paths, transform)
     database = load_database(faces, paths, model)
     faceRecognition()
-
-if __name__ == "__main__":
-    test_main()
