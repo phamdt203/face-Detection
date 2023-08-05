@@ -2,7 +2,7 @@ import train
 import test
 import torch.optim as optim
 from model import *
-from torch.utils.data import DataLoader, SubsetRandomSampler
+from torch.utils.data import DataLoader, random_split
 from torchvision.transforms import transforms
 from predict import *
 from parameters import *
@@ -20,19 +20,26 @@ def load_dataset(transform):
     return TripletFaceDataset(root_dir= r"cropped", transform= transform)
 
 def split_dataset(dataset):
-    val_split = 0.2
-    dataset_size = len(dataset)
-    indices = list(range(dataset_size))
-    split = int(val_split * dataset_size)
-    train_indices, val_indices = indices[split : ], indices[:split]
-    
-    train_sampler = SubsetRandomSampler(train_indices)
-    val_sampler = SubsetRandomSampler(val_indices)
+    train_ratio = 0.6
+    val_ratio = 0.2
+    test_ratio = 0.2
 
-    train_loader = DataLoader(dataset, batch_size= BATCH_SIZE, sampler=train_sampler)
-    val_loader = DataLoader(dataset, batch_size=BATCH_SIZE, sampler=val_sampler)
+    # Tính số lượng mẫu tương ứng cho mỗi tập dữ liệu
+    num_samples = len(dataset)
+    num_train_samples = int(train_ratio * num_samples)
+    num_val_samples = int(val_ratio * num_samples)
+    num_test_samples = num_samples - num_train_samples - num_val_samples
 
-    return train_loader, val_loader
+    # Chia tập dataset thành các tập train, validation và test
+    train_dataset, temp_dataset = random_split(dataset, [num_train_samples, num_samples - num_train_samples])
+    val_dataset, test_dataset = random_split(temp_dataset, [num_val_samples, num_test_samples])
+
+    # Tạo DataLoader cho mỗi tập dataset để sử dụng trong quá trình huấn luyện và kiểm tra
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+
+    return train_loader, val_loader, test_loader
 
 def main():
     model = load_model()
@@ -47,8 +54,8 @@ def main():
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
     ])
     dataset = load_dataset(preprocess)
-    train_loader, test_loader = split_dataset(dataset)
-    train.train(train_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
+    train_loader, val_loader, test_loader = split_dataset(dataset)
+    train.train(train_loader, val_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
     print(f"Accuracy :  {test.test(test_loader, model, device)}")
     database, paths = load_database(model, preprocess, device)
     faceRecognition(database, paths, device, model, preprocess)
