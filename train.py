@@ -21,7 +21,7 @@ def evalute(model, val_loader, device):
 
 def train(train_loader, val_loader, model, device, optimizer, loss_fn, num_epochs):
     model.train(True)
-    number_of_batch = 5
+    # number_of_batch = 5
     for epoch in range(num_epochs):
         loss_total = 0
         for i, triplet in enumerate(train_loader):
@@ -33,8 +33,8 @@ def train(train_loader, val_loader, model, device, optimizer, loss_fn, num_epoch
             loss.backward()
             optimizer.step()
             loss_total += loss.item()
-            if i == number_of_batch:
-                break
+            # if i == number_of_batch:
+            #     break
         print(f"Epoch [{epoch + 1} / {num_epochs}], average loss value : {loss_total / len(train_loader)}")
     print(f"Accuracy : {evalute(model, val_loader, device)}")
     torch.save(model.state_dict(), "facenet_model.pth")
