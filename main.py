@@ -4,7 +4,6 @@ import torch.optim as optim
 from model import *
 from torch.utils.data import DataLoader, random_split
 from torchvision.transforms import transforms
-from predict import *
 from parameters import *
 from data import *
 from utilsData import load_database
@@ -56,7 +55,6 @@ def main():
     train.train(train_loader, val_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
     print(f"Accuracy :  {test.test(test_loader, model, device)}")
     database, paths = load_database(model, preprocess, device)
-    faceRecognition(database, paths, device, model, preprocess)
 
 if __name__ == '__main__':
     main()

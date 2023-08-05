@@ -6,6 +6,7 @@ from PIL import Image
 from parameters import *
 from faceDetector import *
 import torch.nn.functional as F
+from model import mobilenet_v2
 
 def img_to_encoding(image_tensor, model, device, preprocess):
     image_tensor = preprocess(image_tensor).unsqueeze(0).to(device)
@@ -51,3 +52,21 @@ def faceRecognition(database, paths, device, model, preprocess):
             cv2.putText(image, face_name, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 255, 0), font_thickness)
         cv2.imwrite(f"output/{face_name}.jpg", image)
 
+model = mobilenet_v2()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = model.to(device)
+preprocess = transforms.Compose([
+        transforms.Resize(IMAGE_SIZE),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
+    ])
+
+with open("./path_dict.p", "rb") as f:
+    paths = pickle.load(f)
+
+with open("./database_dict.p", "rb") as f:
+    database = pickle.load(f)
+    
+faceRecognition(database, paths, device, model, preprocess)

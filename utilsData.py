@@ -44,4 +44,7 @@ def load_database(model, transform, device):
       if os.path.exists(paths[face]):
         for img in os.listdir(paths[face]):
             database[face].append(img_to_encoding(os.path.join(paths[face],img), model, transform, device))
+    with open("./database_dict.p", "wb") as f:
+       pickle.dump(database, f)
     return database, paths
+
