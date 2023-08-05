@@ -7,19 +7,6 @@ from parameters import *
 from faceDetector import *
 import torch.nn.functional as F
 
-def load_database():
-    with open("./database.p", "rb") as f:
-        database = pickle.load(f)
-    return database
-
-def load_model():
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained = True)
-    model = model.to(device)
-    model.load_state_dict(torch.load("facenet_model.pth"))
-    model.eval()
-    return model
-
 def preprocees(image):
     transform = transforms.Compose([
         transforms.Resize(IMAGE_SIZE),
@@ -56,24 +43,20 @@ def Recognized(testEmbedding, database):
             face_name = face
     return face_name
 
-def faceRecognition(image_path):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = load_model()
-    image = Image.open(image_path).convert("RGB")
-    database = load_database()
-    fd = faceDetector('haarcascade_frontalface_default.xml')
-    image_tensor, faceRects = faceDetector(fd, image_path)
-    testEmbedding = img_to_encoding(image_tensor, model, device)
-    face_name = Recognized(testEmbedding, database)
-
-    for (x, y, w, h) in faceRects:
-        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        font_scale = 0.75
-        font_thickness = 2
-        text_size = cv2.getTextSize(face_name, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)
-        text_x = x + (w - text_size[0]) // 2
-        text_y = y - 10
-        cv2.putText(image, face_name, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 255, 0), font_thickness)
-
-    cv2.imshow(image)
+def faceRecognition(database, paths, device, model):
+    for face in database.keys()[:5]:
+        image = Image.open(paths[face]).convert("RGB")
+        fd = faceDetector('haarcascade_frontalface_default.xml')
+        image_tensor, faceRects = faceDetector(fd, paths[face])
+        testEmbedding = img_to_encoding(image_tensor, model, device)
+        face_name = Recognized(testEmbedding, database)
+        for (x, y, w, h) in faceRects:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            font_scale = 0.75
+            font_thickness = 2
+            text_size = cv2.getTextSize(face_name, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)
+            text_x = x + (w - text_size[0]) // 2
+            text_y = y - 10
+            cv2.putText(image, face_name, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 255, 0), font_thickness)
+        cv2.imwrite(f"output/{face_name}.jpg", image)
 

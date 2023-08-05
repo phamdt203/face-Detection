@@ -33,7 +33,9 @@ def img_to_encoding(image_path, model, transform, device):
     with torch.no_grad():
         return model(image_tensor)
 
-def load_database(faces, paths, model, transform, device):
+def load_database(model, transform, device):
+    paths = load_path()
+    faces = load_face(paths)
     database = {}
     for face in faces:
         database[face] = []
