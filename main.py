@@ -49,7 +49,7 @@ def main():
     dataset = load_dataset(preprocess)
     train_loader, test_loader = split_dataset(dataset)
     train.train(train_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
-    print(f"Accuracy :  {test.test(train_loader, model, device)}")
+    print(f"Accuracy :  {test.test(test_loader, model, device)}")
     database, paths = load_database(model, preprocess, device)
     faceRecognition(database, paths, device, model, preprocess)
 
