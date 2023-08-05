@@ -41,14 +41,15 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     preprocess = transforms.Compose([
         transforms.Resize(IMAGE_SIZE),
-        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
     ])
     dataset = load_dataset(preprocess)
     train_loader, test_loader = split_dataset(dataset)
     train.train(train_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
-    print(f"Accuracy :  {test.test(test_loader, model, device)}")
+    print(f"Accuracy :  {test.test(train_loader, model, device)}")
     database, paths = load_database(model, preprocess, device)
     faceRecognition(database, paths, device, model, preprocess)
 
