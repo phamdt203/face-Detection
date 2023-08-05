@@ -24,17 +24,14 @@ def split_dataset(dataset):
     val_ratio = 0.2
     test_ratio = 0.2
 
-    # Tính số lượng mẫu tương ứng cho mỗi tập dữ liệu
     num_samples = len(dataset)
     num_train_samples = int(train_ratio * num_samples)
     num_val_samples = int(val_ratio * num_samples)
     num_test_samples = num_samples - num_train_samples - num_val_samples
 
-    # Chia tập dataset thành các tập train, validation và test
     train_dataset, temp_dataset = random_split(dataset, [num_train_samples, num_samples - num_train_samples])
     val_dataset, test_dataset = random_split(temp_dataset, [num_val_samples, num_test_samples])
 
-    # Tạo DataLoader cho mỗi tập dataset để sử dụng trong quá trình huấn luyện và kiểm tra
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
@@ -56,9 +53,9 @@ def main():
     dataset = load_dataset(preprocess)
     train_loader, val_loader, test_loader = split_dataset(dataset)
     train.train(train_loader, val_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
-    print(f"Accuracy :  {test.test(test_loader, model, device)}")
-    database, paths = load_database(model, preprocess, device)
-    faceRecognition(database, paths, device, model, preprocess)
+    # print(f"Accuracy :  {test.test(test_loader, model, device)}")
+   # database, paths = load_database(model, preprocess, device)
+  #  faceRecognition(database, paths, device, model, preprocess)
 
 if __name__ == '__main__':
     main()
