@@ -7,17 +7,8 @@ from parameters import *
 from faceDetector import *
 import torch.nn.functional as F
 
-def preprocees(image):
-    transform = transforms.Compose([
-        transforms.Resize(IMAGE_SIZE),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    ])
-    return transform(image)
-
-def img_to_encoding(image_tensor, model, device):
-    image_tensor = preprocees(image_tensor).unsqueeze(0).to(device)
+def img_to_encoding(image_tensor, model, device, preprocess):
+    image_tensor = preprocess(image_tensor).unsqueeze(0).to(device)
     with torch.no_grad():
         return model(image_tensor)
 
@@ -43,12 +34,12 @@ def Recognized(testEmbedding, database):
             face_name = face
     return face_name
 
-def faceRecognition(database, paths, device, model):
+def faceRecognition(database, paths, device, model, preprocess):
     for face in database.keys()[:5]:
         image = Image.open(paths[face]).convert("RGB")
         fd = faceDetector('haarcascade_frontalface_default.xml')
         image_tensor, faceRects = faceDetector(fd, paths[face])
-        testEmbedding = img_to_encoding(image_tensor, model, device)
+        testEmbedding = img_to_encoding(image_tensor, model, device, preprocess)
         face_name = Recognized(testEmbedding, database)
         for (x, y, w, h) in faceRects:
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)

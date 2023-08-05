@@ -7,7 +7,6 @@ from torchvision.transforms import transforms
 from PIL import Image
 from predict import *
 from parameters import *
-from loss import *
 from data import *
 from utilsData import load_database
 
@@ -17,13 +16,7 @@ def load_model():
     model = model.to(device)
     return model
 
-def load_dataset():
-    transform = transforms.Compose([
-        transforms.Resize(IMAGE_SIZE),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    ])
+def load_dataset(transform):
     return TripletFaceDataset(root_dir= r"cropped", transform= transform)
 
 def split_dataset(dataset):
@@ -46,12 +39,18 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
     loss_fn = nn.TripletMarginLoss(margin = ALPHA)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    dataset = load_dataset()
+    preprocess = transforms.Compose([
+        transforms.Resize(IMAGE_SIZE),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    ])
+    dataset = load_dataset(preprocess)
     train_loader, test_loader = split_dataset(dataset)
     train.train(train_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
     print(f"Accuracy :  {test.test(test_loader, model, device)}")
-    database, paths = load_database(model)
-    faceRecognition(database, paths)
+    database, paths = load_database(model, preprocess, device)
+    faceRecognition(database, paths, device, model, preprocess)
 
 if __name__ == '__main__':
     main()
