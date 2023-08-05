@@ -29,7 +29,11 @@ class TripletFaceDataset(Dataset):
         images = self._get_images_from_folder(person_path)
         num_images = len(images)
         
-        anchor_idx, positive_idx = self._random_triplet_indices(num_images)
+        try:
+            anchor_idx, positive_idx = self._random_triplet_indices(num_images)
+        except:
+            anchor_idx = 0
+            positive_idx = 0
         anchor_path = os.path.join(person_path, images[anchor_idx])
         positive_path = os.path.join(person_path, images[positive_idx])
 
