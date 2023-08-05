@@ -15,5 +15,5 @@ def train(train_loader, model, device, optimizer, loss_fn, num_epochs):
             loss.backward()
             optimizer.step()
             loss_total += loss.item()
-            print(f"Epoch [{epoch + 1} / {num_epochs}], average loss value : {loss_total / len(train_loader)}")
+        print(f"Epoch [{epoch + 1} / {num_epochs}], average loss value : {loss_total / len(train_loader)}")
     torch.save(model.state_dict(), "facenet_model.pth")
