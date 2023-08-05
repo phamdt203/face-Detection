@@ -4,15 +4,15 @@ import torch.optim as optim
 from model import *
 from torch.utils.data import DataLoader, SubsetRandomSampler
 from torchvision.transforms import transforms
-from PIL import Image
 from predict import *
 from parameters import *
 from data import *
 from utilsData import load_database
+from model import InceptionResnetV1
 
 def load_model():
+    model = InceptionResnetV1()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = mobilenet_v2(pretrained=False)
     model = model.to(device)
     return model
 

@@ -1,12 +1,9 @@
 import os
 import torch
-import torch.nn as nn
 import random
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 from PIL import Image
 from parameters import *
-import matplotlib.pyplot as plt
 
 class TripletFaceDataset(Dataset):
     def __init__(self, root_dir, transform = None):
@@ -31,12 +28,6 @@ class TripletFaceDataset(Dataset):
         person_path = os.path.join(self.root_dir, person_folder)
         images = self._get_images_from_folder(person_path)
         num_images = len(images)
-
-        if num_images < 2:
-            dummy_image = Image.new('RGB', (96, 96))
-            if self.transform:
-                dummy_image = self.transform(dummy_image)
-            return dummy_image, dummy_image, dummy_image
         
         anchor_idx, positive_idx = self._random_triplet_indices(num_images)
         anchor_path = os.path.join(person_path, images[anchor_idx])
