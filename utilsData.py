@@ -44,4 +44,4 @@ def load_database(model, transform, device):
       if os.path.exists(paths[face]):
         for img in os.listdir(paths[face]):
             database[face].append(img_to_encoding(os.path.join(paths[face],img), model, transform, device))
-    return database
+    return database, paths
