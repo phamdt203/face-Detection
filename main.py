@@ -8,10 +8,11 @@ from predict import *
 from parameters import *
 from data import *
 from utilsData import load_database
-from model import InceptionResnetV1
+from model import *
+import torch.nn as nn
 
 def load_model():
-    model = InceptionResnetV1()
+    model = mobilenet_v2()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     return model
@@ -53,9 +54,9 @@ def main():
     dataset = load_dataset(preprocess)
     train_loader, val_loader, test_loader = split_dataset(dataset)
     train.train(train_loader, val_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
-    # print(f"Accuracy :  {test.test(test_loader, model, device)}")
-   # database, paths = load_database(model, preprocess, device)
-  #  faceRecognition(database, paths, device, model, preprocess)
+    print(f"Accuracy :  {test.test(test_loader, model, device)}")
+    database, paths = load_database(model, preprocess, device)
+    faceRecognition(database, paths, device, model, preprocess)
 
 if __name__ == '__main__':
     main()
