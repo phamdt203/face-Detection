@@ -37,7 +37,7 @@ def Recognized(testEmbedding, database):
 
 def faceRecognition(database, paths, device, model, preprocess):
     for face in list(database)[:5]:
-        image = Image.open(paths[face]).convert("RGB")
+        image = Image.open(paths[face].replace('\\', '/')).convert("RGB")
         fd = faceDetector('haarcascade_frontalface_default.xml')
         image_tensor, faceRects = faceDetector(fd, paths[face])
         testEmbedding = img_to_encoding(image_tensor, model, device, preprocess)
