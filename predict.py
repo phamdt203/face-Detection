@@ -37,20 +37,21 @@ def Recognized(testEmbedding, database):
 
 def faceRecognition(database, paths, device, model, preprocess):
     for face in list(database)[:5]:
-        image = Image.open(paths[face].replace('\\', '/')).convert("RGB")
-        fd = faceDetector('haarcascade_frontalface_default.xml')
-        image_tensor, faceRects = faceDetector(fd, paths[face])
-        testEmbedding = img_to_encoding(image_tensor, model, device, preprocess)
-        face_name = Recognized(testEmbedding, database)
-        for (x, y, w, h) in faceRects:
-            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            font_scale = 0.75
-            font_thickness = 2
-            text_size = cv2.getTextSize(face_name, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)
-            text_x = x + (w - text_size[0]) // 2
-            text_y = y - 10
-            cv2.putText(image, face_name, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 255, 0), font_thickness)
-        cv2.imwrite(f"output/{face_name}.jpg", image)
+        if os.path.exists(paths[face]):
+            image = Image.open(os.listdir(paths[face].replace('\\', '/'))[0]).convert("RGB")
+            fd = faceDetector('haarcascade_frontalface_default.xml')
+            image_tensor, faceRects = faceDetector(fd, paths[face])
+            testEmbedding = img_to_encoding(image_tensor, model, device, preprocess)
+            face_name = Recognized(testEmbedding, database)
+            for (x, y, w, h) in faceRects:
+                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                font_scale = 0.75
+                font_thickness = 2
+                text_size = cv2.getTextSize(face_name, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)
+                text_x = x + (w - text_size[0]) // 2
+                text_y = y - 10
+                cv2.putText(image, face_name, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 255, 0), font_thickness)
+            cv2.imwrite(f"output/{face_name}.jpg", image)
 
 model = mobilenet_v2()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
