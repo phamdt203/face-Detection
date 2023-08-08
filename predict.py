@@ -44,6 +44,7 @@ def Recognized(testEmbedding, database):
 def faceRecognition(database, paths, device, model, preprocess):
     for face in list(database)[:5]:
         paths[face] = paths[face].replace('\\', '/')
+        paths[face] = paths[face].replace('cropped', 'lfw')
         if os.path.exists(paths[face]):
             image_path = os.path.join(paths[face], os.listdir(paths[face])[0])
             image = Image.open(image_path).convert("RGB")
