@@ -2,6 +2,7 @@ import cv2
 import torch
 import pickle
 import numpy as np
+import torch.nn as nn
 from torchvision import transforms
 from PIL import Image
 from parameters import *
@@ -12,7 +13,6 @@ from matplotlib import cm
 
 def img_to_encoding(image_path, model, device, preprocess):
     image_tensor = Image.open(image_path).convert("RGB")
-    image_tensor.save("Tien_pillow.jpg")
     image_tensor = preprocess(image_tensor).unsqueeze(0).to(device)
     with torch.no_grad():
         return model(image_tensor)
@@ -38,6 +38,7 @@ def Recognized(testEmbedding, database):
         if len(database[face]) < 1:
             continue
         similarityScore = similarity_score(database[face][0], testEmbedding)
+        similarityScore = nn.Sigmoid(similarityScore)
         if similarityScore.item() < min_dist:
             min_dist = similarityScore.item()
             face_name = face
