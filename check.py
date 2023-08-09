@@ -1,12 +1,22 @@
-import numpy as np
-from PIL import Image
+import spacy
 
-# Tạo mảng NumPy và hình ảnh PIL (mẫu)
-numpy_array = np.random.rand(100, 100, 3) * 255  # Mảng ngẫu nhiên
-pil_image = Image.fromarray(numpy_array.astype('uint8'))
+nlp = spacy.load("en_core_web_sm")
 
-# Kiểm tra xem mảng NumPy và hình ảnh PIL có giống nhau hay không
-if np.array_equal(numpy_array, np.array(pil_image)):
-    print("Giống nhau")
-else:
-    print("Khác nhau")
+def extract_order_info(sentence):
+    doc = nlp(sentence)
+    order_info = {}
+
+    for token in doc:
+        if token.text.lower() == "đặt":
+            for child in token.children:
+                if child.dep_ == "dobj":
+                    order_info["name"] = child.text
+
+        if token.pos_ == "NUM" and token.dep_ == "nummod":
+            order_info["number"] = token.text
+
+    return order_info
+
+sentence = "Đặt tôi 3 đùi gà KFC"
+order_info = extract_order_info(sentence)
+print(order_info)
