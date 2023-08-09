@@ -9,6 +9,7 @@ from data import *
 from utilsData import load_database
 from model import *
 import torch.nn as nn
+from loss import *
 
 def load_model():
     model = mobilenet_v2()
@@ -41,7 +42,7 @@ def split_dataset(dataset):
 def main():
     model = load_model()
     optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
-    loss_fn = nn.TripletMarginLoss(margin = ALPHA)
+    loss_fn = TripletLoss(margin = ALPHA)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     preprocess = transforms.Compose([
         transforms.Resize(IMAGE_SIZE),
@@ -53,9 +54,8 @@ def main():
     dataset = load_dataset(preprocess)
     train_loader, val_loader, test_loader = split_dataset(dataset)
     train.train(train_loader, val_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
-    print(f"Accuracy :  {test.test(test_loader, model, device)}")
+    print(f"Accuracy on test:  {test.test(test_loader, model, device)}")
     database, paths = load_database(model, preprocess, device)
-    print(paths, database)
 
 if __name__ == '__main__':
     main()

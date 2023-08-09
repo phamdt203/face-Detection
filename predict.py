@@ -18,7 +18,7 @@ def img_to_encoding(image_path, model, device, preprocess):
         return model(image_tensor)
 
 def similarity_score(firstEmbedding, secondEmbedding):
-    return F.pairwise_distance(firstEmbedding, secondEmbedding)
+    return F.cosine_similarity(firstEmbedding, secondEmbedding)
 
 def faceDetector(faceDetector, image_path):    
     image = cv2.imread(image_path)
@@ -30,16 +30,20 @@ def faceDetector(faceDetector, image_path):
         face = image[top : bottom, left : right]
     return face, faceRects
 
-def Recognized(testEmbedding, database):
-    print(similarity_score(testEmbedding, database['Aaron_Eckhart'][0]).item())
-    min_dist = 1000
+def Recognized(testEmbedding, paths, model, device, preprocess):
+    min_dist = 0
     face_name = ""
-    for face in database.keys():
-        if len(database[face]) < 1:
+    for face in paths.keys():
+        paths[face] = paths[face].replace("\\", "/")
+        image = []
+        if os.path.exists(paths[face]):
+            image = os.listdir(paths[face])
+        if len(image) < 1:
             continue
-        similarityScore = similarity_score(database[face][0], testEmbedding)
-        similarityScore = nn.Sigmoid(similarityScore)
-        if similarityScore.item() < min_dist:
+        origin_path = os.path.join(paths[face], image[0])
+        originEmbedding = img_to_encoding(origin_path, model, device, preprocess)
+        similarityScore = similarity_score(testEmbedding, originEmbedding)
+        if similarityScore.item() > min_dist:
             min_dist = similarityScore.item()
             face_name = face
     print(face_name, min_dist)
@@ -55,9 +59,10 @@ def faceRecognition(database, paths, device, model, preprocess):
             image_cropped, faceRects = faceDetector(fd, os.path.join(paths[face].replace("cropped", "lfw"), os.listdir(paths[face].replace("cropped", "lfw"))[0]))
             os.makedirs(f"test_cropped/{face}", exist_ok=True)
             cv2.imwrite(f"test_cropped/{face}/{face}.jpg",image_cropped)
+            print(f"test_cropped/{face}/{face}.jpg")
             print(face)
             testEmbedding = img_to_encoding(f"test_cropped/{face}/{face}.jpg", model, device, preprocess)
-            face_name = Recognized(testEmbedding, database)
+            face_name = Recognized(testEmbedding, paths, model, device, preprocess)
             image = np.array(image)
             for (x, y, w, h) in faceRects:
                 cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
