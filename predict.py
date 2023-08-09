@@ -10,9 +10,8 @@ import torch.nn.functional as F
 from model import mobilenet_v2
 from matplotlib import cm
 
-def img_to_encoding(image_tensor, model, device, preprocess):
-    cv2.imwrite("Tien_cv2.jpg",image_tensor)
-    image_tensor = Image.fromarray(image_tensor)
+def img_to_encoding(image_path, model, device, preprocess):
+    image_tensor = Image.open(image_path).convert("RGB")
     image_tensor.save("Tien_pillow.jpg")
     image_tensor = preprocess(image_tensor).unsqueeze(0).to(device)
     with torch.no_grad():
@@ -22,10 +21,8 @@ def similarity_score(firstEmbedding, secondEmbedding):
     return F.pairwise_distance(firstEmbedding, secondEmbedding)
 
 def faceDetector(faceDetector, image_path):    
-    # image = cv2.imread(image_path)
-    # gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    image = Image.open(image_path).convert("RGB")
-    gray_img = image.convert("L")
+    image = cv2.imread(image_path)
+    gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faceRects = faceDetector.detectMultiScale(gray_img, 1.1, 9)
     face = np.zeros((image.shape[0], image.shape[1]))
     for (x, y, w, h) in faceRects:
@@ -34,6 +31,7 @@ def faceDetector(faceDetector, image_path):
     return face, faceRects
 
 def Recognized(testEmbedding, database):
+    print(similarity_score(testEmbedding, database['Aaron_Eckhart'][0]).item())
     min_dist = 1000
     face_name = ""
     for face in database.keys():
@@ -49,14 +47,15 @@ def Recognized(testEmbedding, database):
 def faceRecognition(database, paths, device, model, preprocess):
     for face in list(database)[:5]:
         paths[face] = paths[face].replace('\\', '/')
-        paths[face] = paths[face].replace('cropped', 'lfw')
         if os.path.exists(paths[face]):
             image_path = os.path.join(paths[face], os.listdir(paths[face])[0])
-            image = Image.open(image_path).convert("RGB")
+            image = cv2.imread(image_path)
             fd = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-            image_tensor, faceRects = faceDetector(fd, image_path)
-
-            testEmbedding = img_to_encoding(image_tensor, model, device, preprocess)
+            image_cropped, faceRects = faceDetector(fd, os.path.join(paths[face].replace("cropped", "lfw"), os.listdir(paths[face].replace("cropped", "lfw"))[0]))
+            os.makedirs(f"test_cropped/{face}", exist_ok=True)
+            cv2.imwrite(f"test_cropped/{face}/{face}.jpg",image_cropped)
+            print(face)
+            testEmbedding = img_to_encoding(f"test_cropped/{face}/{face}.jpg", model, device, preprocess)
             face_name = Recognized(testEmbedding, database)
             image = np.array(image)
             for (x, y, w, h) in faceRects:
