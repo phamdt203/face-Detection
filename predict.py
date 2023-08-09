@@ -11,7 +11,9 @@ from model import mobilenet_v2
 from matplotlib import cm
 
 def img_to_encoding(image_tensor, model, device, preprocess):
-    image_tensor = Image.fromarray(image_tensor).convert("RGB")
+    cv2.imwrite("Tien_cv2.jpg",image_tensor)
+    image_tensor = Image.fromarray(image_tensor)
+    image_tensor.save("Tien_pillow.jpg")
     image_tensor = preprocess(image_tensor).unsqueeze(0).to(device)
     with torch.no_grad():
         return model(image_tensor)
@@ -20,8 +22,10 @@ def similarity_score(firstEmbedding, secondEmbedding):
     return F.pairwise_distance(firstEmbedding, secondEmbedding)
 
 def faceDetector(faceDetector, image_path):    
-    image = cv2.imread(image_path)
-    gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # image = cv2.imread(image_path)
+    # gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = Image.open(image_path).convert("RGB")
+    gray_img = image.convert("L")
     faceRects = faceDetector.detectMultiScale(gray_img, 1.1, 9)
     face = np.zeros((image.shape[0], image.shape[1]))
     for (x, y, w, h) in faceRects:
@@ -36,9 +40,10 @@ def Recognized(testEmbedding, database):
         if len(database[face]) < 1:
             continue
         similarityScore = similarity_score(database[face][0], testEmbedding)
-        if similarityScore < min_dist:
-            min_dist = similarityScore
+        if similarityScore.item() < min_dist:
+            min_dist = similarityScore.item()
             face_name = face
+    print(face_name, min_dist)
     return face_name
 
 def faceRecognition(database, paths, device, model, preprocess):
@@ -50,6 +55,7 @@ def faceRecognition(database, paths, device, model, preprocess):
             image = Image.open(image_path).convert("RGB")
             fd = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
             image_tensor, faceRects = faceDetector(fd, image_path)
+
             testEmbedding = img_to_encoding(image_tensor, model, device, preprocess)
             face_name = Recognized(testEmbedding, database)
             image = np.array(image)
