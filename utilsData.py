@@ -47,4 +47,3 @@ def load_database(model, transform, device):
     with open("./database_dict.p", "wb") as f:
        pickle.dump(database, f)
     return database, paths
-

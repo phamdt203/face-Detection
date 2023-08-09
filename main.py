@@ -55,6 +55,7 @@ def main():
     train.train(train_loader, val_loader, model, device, optimizer, loss_fn, NUM_EPOCHS)
     print(f"Accuracy :  {test.test(test_loader, model, device)}")
     database, paths = load_database(model, preprocess, device)
+    print(paths, database)
 
 if __name__ == '__main__':
     main()
