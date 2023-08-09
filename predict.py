@@ -53,10 +53,10 @@ def faceRecognition(database, paths, device, model, preprocess):
     for face in list(database)[:5]:
         paths[face] = paths[face].replace('\\', '/')
         if os.path.exists(paths[face]):
-            image_path = os.path.join(paths[face], os.listdir(paths[face])[0])
+            image_path = os.path.join(paths[face].replace("cropped", "lfw"), os.listdir(paths[face].replace("cropped", "lfw"))[0])
             image = cv2.imread(image_path)
             fd = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-            image_cropped, faceRects = faceDetector(fd, os.path.join(paths[face].replace("cropped", "lfw"), os.listdir(paths[face].replace("cropped", "lfw"))[0]))
+            image_cropped, faceRects = faceDetector(fd, os.path.join(image_path))
             os.makedirs(f"test_cropped/{face}", exist_ok=True)
             cv2.imwrite(f"test_cropped/{face}/{face}.jpg",image_cropped)
             print(f"test_cropped/{face}/{face}.jpg")
