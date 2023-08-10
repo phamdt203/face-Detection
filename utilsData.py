@@ -2,6 +2,9 @@ import pickle
 import os
 from PIL import Image
 import torch
+from model import mobilenet_v2
+from torchvision import transforms
+from parameters import *
 
 def load_path():
     with open("./path_dict.p", "rb") as f:

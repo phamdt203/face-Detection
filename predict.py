@@ -9,7 +9,7 @@ from parameters import *
 from faceDetector import *
 import torch.nn.functional as F
 from model import mobilenet_v2
-from matplotlib import cm
+import streamlit as st
 
 def img_to_encoding(image_path, model, device, preprocess):
     image_tensor = Image.open(image_path).convert("RGB")
@@ -94,3 +94,4 @@ with open("./database_dict.p", "rb") as f:
     database = pickle.load(f)
     
 faceRecognition(database, paths, device, model, preprocess)
+
