@@ -16,7 +16,7 @@ class TripletFaceDataset(Dataset):
         return len(self.person_folders)
     
     def _get_images_from_folder(self, folderPath):
-        images = [img_name for img_name in os.listdir(folderPath) if img_name.endswith('.jpg')]
+        images = [img_name for img_name in os.listdir(folderPath) if img_name.endswith('.JPG')]
         return images
     
     def _random_triplet_indices(self, numImages):
